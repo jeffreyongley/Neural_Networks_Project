@@ -52,7 +52,30 @@ results = model.evaluate(test_data, test_labels)
 
 model.save("model.h5")
 '''
+
+def review_encode(s):
+    encoded = [1] # set start tag for consistency
+
+    for word in s:
+        if word.lower() in word_index: # if word exists in know words append it
+            encoded.append(word_index[word.lower()])
+        else: #otherwise use unknown tag
+            encoded.append(2)
+
+    return encoded
+
+
 model = keras.models.load_model("model.h5")
+
+with open("lion_king_review.txt", encoding ="utf-8") as f:
+    for line in f.readlines(): # Go line by line
+        nline = line.replace(",", "").replace(".","").replace(":", "").replace("(", "").replace(")","").replace("\"", "").strip().split(" ")
+        encode = review_encode(nline)
+        encode = keras.preprocessing.sequence.pad_sequences([encode], value=word_index["<PAD>"], padding="post", maxlen=250)
+        predict = model.predict(encode)
+        print(line)
+        print(encode)
+        print(predict[0])
 
 
 '''
